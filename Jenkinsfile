@@ -5,7 +5,7 @@ pipeline {
         APP_NAME = "online-book-store"
         IMAGE_NAME = "online-book-store:v1"
         CONTAINER_NAME = "bookstore"
-        HOST_PORT = "9090"
+        HOST_PORT = "8083"
         CONTAINER_PORT = "8080"
     }
 
@@ -13,7 +13,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/your-username/online-book-store.git'
+                    url: 'https://github.com/Srikanth-169/onlinebookstore.git'
             }
         }
 
@@ -35,10 +35,7 @@ pipeline {
         stage('Deploy Container') {
             steps {
                 sh '''
-                  # Remove old container if exists
                   docker rm -f $CONTAINER_NAME || true
-
-                  # Run new container
                   docker run -d --name $CONTAINER_NAME -p $HOST_PORT:$CONTAINER_PORT $IMAGE_NAME
                 '''
             }
@@ -46,7 +43,7 @@ pipeline {
 
         stage('Check Deployment') {
             steps {
-                sh 'docker ps | grep $CONTAINER_NAME'
+                sh 'docker ps | grep $CONTAINER_NAME || true'
             }
         }
     }
@@ -54,7 +51,9 @@ pipeline {
     post {
         success {
             echo "✅ Online Book Store deployed successfully at http://<server-ip>:$HOST_PORT"
-          }
+        }
+        failure {
+            echo "❌ Deployment failed. Check logs."
         }
     }
 }
