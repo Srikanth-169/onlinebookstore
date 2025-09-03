@@ -13,7 +13,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/your-repo.git'
+                    url: 'https://github.com/Srikanth-169/onlinebookstore.git'
             }
         }
 
