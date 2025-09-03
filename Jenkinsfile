@@ -26,8 +26,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                  docker rmi -f $IMAGE_NAME || true
-                  docker build -t $IMAGE_NAME -f Dockerfile .
+                  docker rmi -f IMAGE_NAME || true
+                sh 'docker build -t online-book-store:v1 -f docker/Dockerfile .'
                 '''
             }
         }
@@ -35,22 +35,22 @@ pipeline {
         stage('Deploy Container') {
             steps {
                 sh '''
-                  docker rm -f $CONTAINER_NAME || true
-                  docker run -d --name $CONTAINER_NAME -p $HOST_PORT:$CONTAINER_PORT $IMAGE_NAME
+                  docker rm -f CONTAINER_NAME || true
+                  docker run -d --name CONTAINER_NAME -p HOST_PORT:CONTAINER_PORT IMAGE_NAME
                 '''
             }
         }
 
         stage('Check Deployment') {
             steps {
-                sh 'docker ps | grep $CONTAINER_NAME || true'
+                sh 'docker ps | grep CONTAINER_NAME || true'
             }
         }
     }
 
     post {
         success {
-            echo "✅ Online Book Store deployed successfully at http://<server-ip>:$HOST_PORT"
+            echo "✅ Online Book Store deployed successfully at http://<server-ip>:HOST_PORT"
         }
         failure {
             echo "❌ Deployment failed. Check logs."
