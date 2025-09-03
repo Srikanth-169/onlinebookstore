@@ -5,7 +5,7 @@ pipeline {
         APP_NAME = "online-book-store"
         IMAGE_NAME = "online-book-store:v1"
         CONTAINER_NAME = "bookstore"
-        HOST_PORT = "8082"
+        HOST_PORT = "8008"
         CONTAINER_PORT = "8080"
     }
 
