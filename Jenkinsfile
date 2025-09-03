@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'tes' }
 
     environment {
         APP_NAME = "online-book-store"
