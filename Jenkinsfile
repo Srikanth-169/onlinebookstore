@@ -24,7 +24,6 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                    docker rmi -f ${DOCKER_IMAGE} || true
                     docker build -t ${DOCKER_IMAGE} .
                 '''
             }
