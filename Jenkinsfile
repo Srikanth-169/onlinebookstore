@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "srikanth169/online-book-store:latest"
+        DOCKER_IMAGE = "online-book-store:v1"
         APP_NAME = "online-book-store"
         SERVER = "your.server.ip.here"   // Replace with your server IP
         SERVER_USER = "youruser"         // Replace with your server's SSH user
@@ -21,14 +21,12 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                sh '''
-                    docker rmi -f ${DOCKER_IMAGE} || true
-                    docker build -t ${DOCKER_IMAGE} .
-                '''
+       stage('Build Docker Image') {
+          steps {
+            sh "docker build -t ${DOCKER_IMAGE} ."
             }
-        }
+         }
+
 
         stage('Push to Docker Hub') {
             steps {
