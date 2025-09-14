@@ -1,17 +1,19 @@
 pipeline {
-    agent any
+    agent { label 'tes' }
 
     environment {
-        DOCKER_IMAGE = "online-book-store:v1"
         APP_NAME = "online-book-store"
-        SERVER = "your.server.ip.here"   // Replace with your server IP
-        SERVER_USER = "youruser"         // Replace with your server's SSH user
+        IMAGE_NAME = "online-book-store:v1"
+        CONTAINER_NAME = "bookstore"
+        HOST_PORT = "8008"
+        CONTAINER_PORT = "8080"
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                git branch: 'master', url: 'https://github.com/Srikanth-169/onlinebookstore.git'
+                git branch: 'master',
+                    url: 'https://github.com/Srikanth-169/onlinebookstore.git'
             }
         }
 
@@ -21,52 +23,33 @@ pipeline {
             }
         }
 
-       stage('Build Docker Image') {
-          steps {
-            sh "docker build -t ${DOCKER_IMAGE} ."
-            }
-         }
-
-
-        stage('Push to Docker Hub') {
+        stage('Build Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push ${DOCKER_IMAGE}
-                    '''
-                }
+                sh "docker rmi -f ${IMAGE_NAME} || true"
+                sh "docker build -t ${IMAGE_NAME} -f Dockerfile ."
             }
         }
 
         stage('Deploy Container') {
             steps {
-                sshagent(['ssh-key-id']) {
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER} "
-                        docker pull ${DOCKER_IMAGE}
-                        docker stop ${APP_NAME} || true
-                        docker rm ${APP_NAME} || true
-                        docker run -d --name ${APP_NAME} -p 9090:8080 ${DOCKER_IMAGE}
-                    "
-                    '''
-                }
+                sh "docker rm -f ${CONTAINER_NAME} || true"
+                sh "docker run -d --name ${CONTAINER_NAME} -p ${HOST_PORT}:${CONTAINER_PORT} ${IMAGE_NAME}"
             }
         }
 
         stage('Check Deployment') {
             steps {
-                sh 'docker ps'
+                sh "docker ps | grep ${CONTAINER_NAME}"
             }
         }
     }
 
     post {
-        always {
-            echo '✅ Pipeline completed.'
-        }
         failure {
-            echo '❌ Deployment failed. Check logs.'
+            echo "❌ Deployment failed. Check logs."
+        }
+        success {
+            echo "✅ Deployment successful."
         }
     }
 }
